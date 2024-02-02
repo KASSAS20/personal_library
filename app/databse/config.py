@@ -1,0 +1,5 @@
+host = '0.0.0.0'
+user = 'postgres'
+password = 'password'
+db_name = 'db'
+port = '8080'
