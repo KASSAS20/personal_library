@@ -2,17 +2,15 @@
 name = "poetry"
 version = "0.1.0"
 description = ""
-authors = ["Your Name <you@example.com>"]
+authors = ["sas <kassas20@mail.ru>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-fastapi = "^0.109.1"
+fastapi = "^0.109.2"
 alembic = "^1.13.1"
-uvicorn = "^0.27.0.post1"
 psycopg2-binary = "^2.9.9"
-python-dotenv = "^1.0.1"
-
+uvicorn = "^0.27.0.post1"
 
 
 [build-system]
