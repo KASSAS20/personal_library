@@ -13,10 +13,10 @@ def token_response(token: str):
     }
 
 
-def generate_jwt(user_password: str, login: str) -> Dict[str, str]:
+def generate_jwt(password: str, login: str) -> Dict[str, str]:
     payload = {
-        "user_login": login,
-        "user_id": user_password,
+        "login": login,
+        "password": password,
         "expires": time.time() + 604800  # +1 неделя
     }
     token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
@@ -30,6 +30,3 @@ def decode_jwt(token: str) -> dict | None:
     except Exception as _ex:
         print(_ex)
         return {}
-
-
-print(generate_jwt('111', "2222"))
