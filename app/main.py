@@ -3,7 +3,6 @@ from fastapi import FastAPI
 from models import User, Base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.exc import SQLAlchemyError
 
 app = FastAPI(title='Library')
 engine = create_engine('postgresql://sas:bratislava@postgres:5432/library')
@@ -20,11 +19,17 @@ def read_root():
 def register(login: str, password: str):
     session = Session()
     try:
-        new_user = User(login=login, password=password)
-        session.add(new_user)
-        session.commit()
-        session.close()
-    except SQLAlchemyError:
+        user_found = session.query(User).filter(User.login == login).first()
+        for i in range(10):
+            print(user_found)
+        if user_found is None:
+            new_user = User(login=login, password=password)
+            session.add(new_user)
+            session.commit()
+        else:
+            return {'error': 'there is already a user with that name'}
+    except Exception as _ex:
         session.rollback()
+        return {'error': _ex}
     finally:
         session.close()
