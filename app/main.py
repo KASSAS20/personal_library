@@ -10,15 +10,11 @@ Session = sessionmaker(bind=engine)
 # Создание таблиц по моделям из models.py
 Base.metadata.create_all(engine)
 
-
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
+session = Session()
 
 
 # Проверка jwt-токена на валидность
-def validation_user(jwt: str):
-    session = Session()
+def validation_user(jwt: str, session=session):
     try:
         parse_jwt = JWT.decode_jwt(jwt)
         login = str(parse_jwt['login'])
@@ -37,8 +33,7 @@ def validation_user(jwt: str):
 
 
 @app.post("/auth/register/")
-async def register(login: str, password: str):
-    session = Session()
+async def register(login: str, password: str, session=session):
     try:
         # проверяем есть ли пользователь с таким именем
         user_found = session.query(User).filter(User.login == login).first()
@@ -57,9 +52,8 @@ async def register(login: str, password: str):
 
 
 @app.get("/auth/login/")
-async def login(response: Response, request: Request, login: str, password: str):
+async def login(response: Response, request: Request, login: str, password: str, session=session):
     cookies = request.cookies
-    session = Session()
     jwt_token = cookies.get('jwt_library')
     check_user = validation_user(jwt_token)
     # Если куки не найдены или не валидны(истек срок или пользователь не найден)
@@ -85,6 +79,7 @@ async def login(response: Response, request: Request, login: str, password: str)
             session.close()
     else:
         return {'access': True}
+
 
 @app.post("/auth/logout")
 async def logout(response: Response):
