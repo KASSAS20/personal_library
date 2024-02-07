@@ -6,15 +6,15 @@ from sqlalchemy import pool
 from alembic import context
 # from config import *
 from app.models import metadata
-
+from config import HOST, PORT, DB, USER, PASSWORD
 config = context.config
 
 section = config.config_ini_section
-config.set_section_option(section, "HOST", 'postgres')
-config.set_section_option(section, "PORT", '5432')
-config.set_section_option(section, "DB", 'library')
-config.set_section_option(section, "USER", 'sas')
-config.set_section_option(section, "PASSWORD", 'bratislava')
+config.set_section_option(section, "HOST", HOST)
+config.set_section_option(section, "PORT", PORT)
+config.set_section_option(section, "DB", DB)
+config.set_section_option(section, "USER", USER)
+config.set_section_option(section, "PASSWORD", PASSWORD)
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
