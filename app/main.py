@@ -2,6 +2,7 @@ from fastapi import FastAPI, Response, Request
 from models import User, UserModel, Base
 from sqlalchemy import create_engine, and_
 from sqlalchemy.orm import sessionmaker
+from datetime import datetime, timezone
 import JWT
 import hashlib
 
@@ -13,8 +14,9 @@ Base.metadata.create_all(engine)
 
 session = Session()
 
-# функция хэширования пароля
-def hash_password(password: str):
+
+# функция хеширования пароля
+def hash_pass(password: str):
     sha256_hash = hashlib.sha256()
     sha256_hash.update(password.encode('utf-8'))
     password = sha256_hash.hexdigest()
@@ -25,8 +27,9 @@ def hash_password(password: str):
 def validation_user(jwt: str, session=session):
     try:
         parse_jwt = JWT.decode_jwt(jwt)
+        print(1111111, jwt)
         login = str(parse_jwt['login'])
-        password = str(parse_jwt['password'])
+        password = str(parse_jwt['hash_password'])
         user_found = session.query(User).filter(and_(User.login == login, User.password == password)).first()
         # Если пользователь не найден
         if user_found is None:
@@ -54,9 +57,20 @@ async def register(login: str, password: str):
                 return {
                     'error': 'password length is less than 8 characters'
                 }
-            password = hash_password(password)
-            user_model = UserModel.parse_obj({'login': login,'hash_password': password})
-            new_user = User(login=user_model.login, hash_password = user_model.hash_password)
+            dt = datetime.utcnow()
+            dt_utc = dt.astimezone(timezone.utc)
+            date_utc = str(dt_utc.date())
+            password = hash_pass(password)
+            user_model = UserModel.parse_obj({
+                'login': login,
+                'hash_password': password,
+                'create_at': date_utc
+            })
+            new_user = User(
+                login=user_model.login,
+                hash_password=user_model.hash_password,
+                create_at=user_model.create_at
+            )
             session.add(new_user)
             session.commit()
         else:
@@ -74,7 +88,7 @@ async def login(response: Response, request: Request, login: str, password: str)
     cookies = request.cookies
     jwt_token = cookies.get('jwt_library')
     check_user = validation_user(jwt_token)
-    password = hash_password(password)
+    password = hash_pass(password)
     # Если куки не найдены или не валидны(истек срок или пользователь не найден)
     if cookies == {} or not check_user:
         try:
@@ -84,7 +98,7 @@ async def login(response: Response, request: Request, login: str, password: str)
             if user_found is None:
                 return {'access': False}
             else:
-                user_model = UserModel.parse_obj({'login': login,'hash_password': password})
+                user_model = UserModel.parse_obj({'login': login, 'hash_password': password})
                 jwt = JWT.generate_jwt(login=user_model.login, password=user_model.hash_password)
                 response.set_cookie(key='jwt_library', value=jwt['access_token'])
                 return {
@@ -94,7 +108,7 @@ async def login(response: Response, request: Request, login: str, password: str)
         except Exception as _ex:
             # при ошибке откатываем изменение бд
             session.rollback()
-            return {'error': _ex}
+            return {'2error': _ex}
         finally:
             session.close()
     else:
@@ -104,5 +118,3 @@ async def login(response: Response, request: Request, login: str, password: str)
 @app.post("/auth/logout")
 async def logout(response: Response):
     response.set_cookie(key='jwt_library', value='')
-
-
