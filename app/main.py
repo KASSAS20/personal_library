@@ -33,7 +33,7 @@ def validation_user(jwt: str, session=session):
 
 
 @app.post("/auth/register/")
-async def register(login: str, password: str, session=session):
+async def register(login: str, password: str):
     try:
         # проверяем есть ли пользователь с таким именем
         user_found = session.query(User).filter(User.login == login).first()
@@ -52,7 +52,7 @@ async def register(login: str, password: str, session=session):
 
 
 @app.get("/auth/login/")
-async def login(response: Response, request: Request, login: str, password: str, session=session):
+async def login(response: Response, request: Request, login: str, password: str):
     cookies = request.cookies
     jwt_token = cookies.get('jwt_library')
     check_user = validation_user(jwt_token)
