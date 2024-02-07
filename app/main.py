@@ -68,15 +68,15 @@ async def login(response: Response, request: Request, login: str, password: str)
             # находим пользователя по имени и паролю, иначе None
             user_found = session.query(User).filter(and_(User.login == login, User.password == password)).first()
             # Если пользователь не найден генерируем jwt и записываем в cookie
-            if user_found is not None:
+            if user_found is None:
+                return {'access': False}
+            else:
                 jwt = JWT.generate_jwt(login=login, password=password)
                 response.set_cookie(key='jwt_library', value=jwt['access_token'])
                 return {
                     'access': True,
                     'jwt': jwt
                 }
-            else:
-                return {'access': False}
         except Exception as _ex:
             # при ошибке откатываем изменение бд
             session.rollback()
