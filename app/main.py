@@ -27,7 +27,6 @@ def hash_pass(password: str):
 def validation_user(jwt: str, session=session):
     try:
         parse_jwt = JWT.decode_jwt(jwt)
-        print(1111111, jwt)
         login = str(parse_jwt['login'])
         password = str(parse_jwt['hash_password'])
         user_found = session.query(User).filter(and_(User.login == login, User.password == password)).first()
