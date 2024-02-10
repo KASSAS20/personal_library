@@ -1,9 +1,8 @@
-from sqlalchemy import MetaData
+from pydantic import BaseModel, field_validator
 from sqlalchemy import Column, String
-from sqlalchemy.ext.declarative import declarative_base
-from pydantic import BaseModel
-
-metadata = MetaData()
+from sqlalchemy import MetaData
+from sqlalchemy.orm import declarative_base
+from datetime import datetime, timezone
 
 Base = declarative_base()
 
@@ -17,5 +16,22 @@ class User(Base):
 
 class UserModel(BaseModel):
     login: str
-    hash_password: str
-    create_at: str = None
+    password: str
+    create_at: str = str(datetime.now(timezone.utc))[:10]
+
+    @field_validator("login")
+    def login_len(cls, v):
+        if len(v) < 3:
+            return False
+        return v
+
+    @field_validator("password")
+    def passwort_len(cls, v):
+        if len(v) < 8:
+            return False
+        return v
+
+
+
+# user = UserModel(login="sssl", hash_password="hashed_password")
+# print(user)

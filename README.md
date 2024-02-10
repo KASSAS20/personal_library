@@ -16,4 +16,4 @@
 
 Данный проект был создан при поддержке:
 
-  [kohiry](https://github.com/kohiry) - куратор
+  [kohiry](https://github.com/kohiry) - ментор

@@ -5,7 +5,7 @@ from sqlalchemy import pool
 
 from alembic import context
 # from config import *
-from app.models import metadata
+from app.models import Base
 from config import HOST, PORT, DB, USER, PASSWORD
 config = context.config
 
@@ -19,7 +19,7 @@ config.set_section_option(section, "PASSWORD", PASSWORD)
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-target_metadata = metadata
+target_metadata = Base.metadata
 
 
 def run_migrations_offline() -> None:
