@@ -1,48 +1,50 @@
+from datetime import datetime, timezone
 from fastapi import FastAPI, Response, Request
-from models import User, UserModel, Base, metadata
+from models import User, UserModel, Base, UserRegistration
 from sqlalchemy import create_engine, and_
 from sqlalchemy.orm import sessionmaker
-import JWT
+import jwt
 import hashlib
 
 app = FastAPI(title='Library')
 engine = create_engine('postgresql://sas:bratislava@postgres:5432/library')
 Session = sessionmaker(bind=engine)
-# Создание таблиц по моделям из models.py
 Base.metadata.create_all(engine)
 
 session = Session()
 
 
 # функция хеширования пароля
-def hash_pass(password: str):
+def hashing(data: str):
     sha256_hash = hashlib.sha256()
-    sha256_hash.update(password.encode('utf-8'))
-    password = sha256_hash.hexdigest()
-    return password
+    sha256_hash.update(data.encode('utf-8'))
+    hashing_data = sha256_hash.hexdigest()
+    return hashing_data
 
 
-# Проверка jwt-токена на валидность
-# def validation_user(jwt: str, session=session):
-#     try:
-#         parse_jwt = JWT.decode_jwt(jwt)
-#         login = str(parse_jwt['login'])
-#         password = str(parse_jwt['hash_password'])
-#         user_found = session.query(User).filter(and_(User.login == login, User.password == password)).first()
-#         # Если пользователь не найден
-#         if user_found is None:
-#             return False
-#         else:
-#             return True
-#     except Exception as _ex:
-#         print(f'error: {_ex}')
-#     finally:
-#         session.commit()
-#         session.close()
+def get_cookie(request, key='secret_key'):
+    cookies = request.cookies
+    jwt_token = cookies.get('jwt_library')
+    check_jwt = True if jwt_token is not None else False
+    if check_jwt:
+        decoded_token = jwt.decode(jwt_token, key, algorithms=['HS256'])
+        real_time = int(datetime.now(timezone.utc).timestamp())
+        payload = decoded_token.get('payload')
+        name = payload['name']
+        iat = payload['iat']
+        user_found = session.query(User).filter(User.login == str(name)).first()
+        if real_time <= int(iat) and user_found:
+            return True
+    return False
+
+
+def set_cookie(response: Response, data: dict, key='secret_key'):
+    jwt_token = jwt.encode(data, key, algorithm='HS256')
+    response.set_cookie(key='jwt_library', value=jwt_token)
 
 
 @app.post("/auth/register/")
-async def register(user: UserModel):
+async def register(user: UserRegistration):
     login = user.login
     password = user.password
     create_at = user.create_at
@@ -52,49 +54,43 @@ async def register(user: UserModel):
 
     if not user_found and login and password:
         # Хеширование пароля
-        hashed_password = hash_pass(password)
+        hashed_password = hashing(password)
 
         # Создание нового пользователя
         new_user = User(login=login, hash_password=hashed_password, create_at=create_at)
         session.add(new_user)
         session.commit()
 
-        return {'accept': True}
-    return {'accept': False}
+        return {'registration': True}
+    return {'registration': False}
 
 
-# @app.get("/auth/login/")
-# async def login(response: Response, request: Request, login: str, password: str):
-#     cookies = request.cookies
-#     jwt_token = cookies.get('jwt_library')
-#     check_user = validation_user(jwt_token)
-#     password = hash_pass(password)
-#     # Если куки не найдены или не валидны(истек срок или пользователь не найден)
-#     if cookies == {} or not check_user:
-#         try:
-#             # находим пользователя по имени и паролю, иначе None
-#             user_found = session.query(User).filter(and_(User.login == login, User.hash_password == password)).first()
-#             # Если пользователь не найден генерируем jwt и записываем в cookie
-#             if user_found is None:
-#                 return {'access': False}
-#             else:
-#                 user_model = UserModel.parse_obj({'login': login, 'hash_password': password})
-#                 jwt = JWT.generate_jwt(login=user_model.login, password=user_model.hash_password)
-#                 response.set_cookie(key='jwt_library', value=jwt['access_token'])
-#                 return {
-#                     'access': True,
-#                     'jwt': jwt
-#                 }
-#         except Exception as _ex:
-#             # при ошибке откатываем изменение бд
-#             session.rollback()
-#             return {'2error': _ex}
-#         finally:
-#             session.close()
-#     else:
-#         return {'access': True}
+@app.post("/auth/login/")
+async def login(response: Response, request: Request, user: UserModel = None):
+    cookie = get_cookie(request=request)
+    if cookie:
+        return {
+            'accept': True
+        }
+    if user is not None:
+        user_found = session.query(User).filter(
+            and_(User.login == user.login, User.hash_password == hashing(user.password))).first()
+        if user_found is not None:
+            data = {
+                'payload': {
+                    'name': user.login,
+                    'iat': int(datetime.now(timezone.utc).timestamp())
+                }
+            }
+            set_cookie(response=response, data=data)
+            return {
+                'accept': True
+            }
+    return {
+        'accept': False
+    }
 
 
-# @app.post("/auth/logout")
-# async def logout(response: Response):
-#     response.set_cookie(key='jwt_library', value='')
+@app.post("/auth/logout")
+async def logout(response: Response):
+    response.set_cookie(key='jwt_library', value='')

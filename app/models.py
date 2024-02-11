@@ -17,7 +17,6 @@ class User(Base):
 class UserModel(BaseModel):
     login: str
     password: str
-    create_at: str = str(datetime.now(timezone.utc))[:10]
 
     @field_validator("login")
     def login_len(cls, v):
@@ -32,6 +31,8 @@ class UserModel(BaseModel):
         return v
 
 
+class UserRegistration(UserModel):
+    create_at: str = str(datetime.now(timezone.utc))[:10]
 
-# user = UserModel(login="sssl", hash_password="hashed_password")
-# print(user)
+
+
