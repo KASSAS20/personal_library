@@ -1,11 +1,13 @@
 from datetime import datetime, timezone
-from fastapi import FastAPI, Response, Request
+from fastapi import FastAPI, Response, Request, Depends
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from app.models import User, UserModel, Base, UserRegistration
 from sqlalchemy import create_engine, and_
 from sqlalchemy.orm import sessionmaker
 from settings import settings
 import jwt
 import hashlib
+import bcrypt
 
 app = FastAPI(title='Library')
 engine = create_engine(
@@ -15,6 +17,7 @@ Session = sessionmaker(bind=engine)
 Base.metadata.create_all(engine)
 
 session = Session()
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
 # функция хеширования пароля
@@ -24,6 +27,9 @@ def hashing(data: str):
     hashing_data = sha256_hash.hexdigest()
     return hashing_data
 
+@app.post('/token')
+async def token():
+    return True
 
 def get_cookie(request, key=settings.SECRET_KEY):
     cookies = request.cookies
@@ -69,15 +75,18 @@ async def register(user: UserRegistration):
 
 
 @app.post("/auth/login/")
-async def login(response: Response, request: Request, user: UserModel = None):
+async def login(response: Response, request: Request, user: UserModel,token: str = Depends(oauth2_scheme)):
     cookie = get_cookie(request=request)
+    print(token)
     if cookie:
         return {
             'accept': True
         }
     if user is not None:
-        user_found = session.query(User).filter(
-            and_(User.login == user.login, User.hash_password == hashing(user.password))).first()
+        if user is not None:
+            hashed_password = bcrypt.hashpw(user.password.encode('utf-8'), bcrypt.gensalt())
+            user_found = session.query(User).filter(
+        and_(User.login == user.login, User.hash_password == hashed_password)).first()
         if user_found is not None:
             data = {
                 'payload': {
