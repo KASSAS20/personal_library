@@ -1,6 +1,5 @@
 from pydantic import BaseModel, field_validator
 from sqlalchemy import Column, String
-from sqlalchemy import MetaData
 from sqlalchemy.orm import declarative_base
 from datetime import datetime, timezone
 

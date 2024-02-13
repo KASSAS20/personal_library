@@ -4,17 +4,16 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
-# from config import *
 from app.models import Base
-from config import HOST, PORT, DB, USER, PASSWORD
+from settings import settings
 config = context.config
 
 section = config.config_ini_section
-config.set_section_option(section, "HOST", HOST)
-config.set_section_option(section, "PORT", PORT)
-config.set_section_option(section, "DB", DB)
-config.set_section_option(section, "USER", USER)
-config.set_section_option(section, "PASSWORD", PASSWORD)
+config.set_section_option(section, "HOST", settings.HOST)
+config.set_section_option(section, "PORT", settings.PORT)
+config.set_section_option(section, "DB", settings.DB)
+config.set_section_option(section, "USER", settings.USER)
+config.set_section_option(section, "PASSWORD", settings.PASSWORD)
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)

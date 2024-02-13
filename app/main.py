@@ -1,13 +1,16 @@
 from datetime import datetime, timezone
 from fastapi import FastAPI, Response, Request
-from models import User, UserModel, Base, UserRegistration
+from app.models import User, UserModel, Base, UserRegistration
 from sqlalchemy import create_engine, and_
 from sqlalchemy.orm import sessionmaker
+from settings import settings
 import jwt
 import hashlib
 
 app = FastAPI(title='Library')
-engine = create_engine('postgresql://sas:bratislava@postgres:5432/library')
+engine = create_engine(
+    f'postgresql://{settings.USER}:{settings.PASSWORD}@{settings.HOST}:{settings.PORT}/{settings.DB}'
+)
 Session = sessionmaker(bind=engine)
 Base.metadata.create_all(engine)
 
@@ -22,7 +25,7 @@ def hashing(data: str):
     return hashing_data
 
 
-def get_cookie(request, key='secret_key'):
+def get_cookie(request, key=settings.SECRET_KEY):
     cookies = request.cookies
     jwt_token = cookies.get('jwt_library')
     check_jwt = True if jwt_token is not None else False
@@ -38,7 +41,7 @@ def get_cookie(request, key='secret_key'):
     return False
 
 
-def set_cookie(response: Response, data: dict, key='secret_key'):
+def set_cookie(response: Response, data: dict, key=settings.SECRET_KEY):
     jwt_token = jwt.encode(data, key, algorithm='HS256')
     response.set_cookie(key='jwt_library', value=jwt_token)
 
