@@ -1,5 +1,7 @@
-from sqlalchemy import Column, String
-from sqlalchemy.orm import declarative_base
+from datetime import datetime, timezone
+
+from sqlalchemy import Column, String, TIMESTAMP, DateTime, create_engine
+from sqlalchemy.orm import declarative_base, Mapped, mapped_column, sessionmaker
 
 Base = declarative_base()
 
@@ -8,4 +10,7 @@ class User(Base):
     __tablename__ = 'users'
     login = Column(String, primary_key=True)
     hash_password = Column(String, nullable=False)
-    create_at = Column(String, nullable=False)
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
+
+
+
