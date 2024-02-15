@@ -14,13 +14,7 @@ class UserModel(BaseModel):
         return v
 
     @field_validator("password")
-    def passwort_len(cls, v):
+    def password_len(cls, v):
         if len(v) < 8:
             return False
         return v
-
-
-class UserRegistration(UserModel):
-    create_at: datetime = datetime.now(timezone.utc)+timedelta(seconds=604800)
-
-
