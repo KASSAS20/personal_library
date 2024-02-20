@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     PASSWORD: str
     HOST: str
     PORT: str
+    KEY: str
 
     class Config:
         env_file = ".env"

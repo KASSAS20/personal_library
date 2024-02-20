@@ -1,11 +1,14 @@
-from fastapi import FastAPI
+from typing import Annotated
+
+from fastapi import FastAPI, Depends
 from app.auth import router as auth
+from app.shemes import User
 
 app = FastAPI()
 
 
-@app.get("/")
-async def root():
-    return {"message": "Привет, мир!"}
+# @app.get("/")
+# async def root(current_user: Annotated[User, Depends(get_current_user)]):
+#     return {"message": "Привет, мир!"}
 
 app.include_router(auth)

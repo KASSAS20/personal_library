@@ -9,8 +9,6 @@ services:
       POSTGRES_PASSWORD: ${PASSWORD}
     ports:
       - "5432:5432"
-    volumes:
-      - .:/postgres
   fastapi:
     build:
       context: .
