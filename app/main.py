@@ -1,8 +1,5 @@
-from typing import Annotated
-
 from fastapi import FastAPI, Depends
 from app.auth import router as auth
-from app.shemes import User
 
 app = FastAPI()
 

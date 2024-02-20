@@ -1,15 +1,13 @@
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from datetime import datetime, timezone
+from app.schemes import UserModel
 from app.database import Connect
-from app.models import UserModel
+from typing import Annotated
+from app.models import User
 from settings import settings
-from app.shemes import User
-from typing import Optional, Annotated
-from jwt import PyJWTError
 import bcrypt
 import jwt
-
 
 router = APIRouter()
 connect = Connect()
@@ -29,11 +27,13 @@ def get_jwt(data, key):
     return jwt_token
 
 
+# checking
 def jwt_decode(token, key):
-  return jwt.decode(jwt=token, key=key, algorithms='HS256')
+    return jwt.decode(jwt=token, key=key, algorithms='HS256')
 
 
-async def get_current_user(token: str = Depends(oauth2)) -> Optional[User]:
+# checking
+async def get_current_user(token: str = Depends(oauth2)):
     credentials_exception = HTTPException(
         status_code=401,
         detail="Could not validate credentials",
@@ -44,9 +44,14 @@ async def get_current_user(token: str = Depends(oauth2)) -> Optional[User]:
         login: str = payload.get("login")
         if login is None:
             raise credentials_exception
-    except PyJWTError:
+    except jwt.PyJWTError:
         raise credentials_exception
     return User(login=login)
+
+
+@router.get("/test")
+async def test(token: Annotated[oauth2, Depends()]):
+    return token
 
 
 @router.post("/registration")
