@@ -1,7 +1,7 @@
 from pydantic import field_validator, BaseModel
 
 
-class UserModel(BaseModel):
+class UserSchema(BaseModel): # поменяй на UserSchema
     login: str
     password: str
 

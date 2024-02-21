@@ -1,16 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from datetime import datetime, timezone
-from app.schemes import UserModel
-from app.database import Connect
+from app.schemes import UserSchema
+from app.database import UserConnect
 from typing import Annotated
-from app.models import User
+from app.models import UserModel
 from settings import settings
 import bcrypt
 import jwt
 
 router = APIRouter()
-connect = Connect()
+connect = UserConnect()
 oauth2 = OAuth2PasswordBearer(tokenUrl="/token")
 
 
@@ -46,7 +46,7 @@ async def get_current_user(token: str = Depends(oauth2)):
             raise credentials_exception
     except jwt.PyJWTError:
         raise credentials_exception
-    return User(login=login)
+    return UserModel(login=login)
 
 
 @router.get("/test")
@@ -55,11 +55,11 @@ async def test(token: Annotated[oauth2, Depends()]):
 
 
 @router.post("/registration")
-async def registration(user: UserModel):
+async def registration(user: UserSchema):
     if user.password and user.login:
         user_found = connect.search_user(user)
         if user_found is None:
-            new_user = User(login=user.login,
+            new_user = UserModel(login=user.login,
                             hash_password=get_hashed_password(user.password).decode(),
                             created_at=datetime.now(timezone.utc)
                             )
