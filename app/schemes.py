@@ -1,7 +1,8 @@
 from pydantic import field_validator, BaseModel
 
 
-class UserSchema(BaseModel): # поменяй на UserSchema
+# Схема данных зарегистрированных пользователей
+class UserSchema(BaseModel):
     login: str
     password: str
 

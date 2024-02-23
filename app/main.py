@@ -1,11 +1,13 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from app.auth import router as auth
 
 app = FastAPI()
 
 
-# @app.get("/")
-# async def root(current_user: Annotated[User, Depends(get_current_user)]):
-#     return {"message": "Привет, мир!"}
+# тестовый роутер для демонстрации работы API
+@app.get("/")
+async def root():
+    return {"message": "Привет, мир!"}
 
+# интегрирование маршрутизатора в основой файл проекта
 app.include_router(auth)

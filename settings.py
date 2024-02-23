@@ -1,6 +1,7 @@
 from pydantic_settings import BaseSettings
 
 
+# схема переменного окружения
 class Settings(BaseSettings):
     DB: str
     USER: str
