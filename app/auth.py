@@ -57,13 +57,13 @@ async def test(token: Annotated[oauth2, Depends()]):
 @router.post("/registration")
 async def registration(user: UserSchema):
     if user.password and user.login:
-        user_found = connect.search_user(user)
+        user_found = await connect.search_user(user)
         if user_found is None:
             new_user = UserModel(login=user.login,
                             hash_password=get_hashed_password(user.password).decode(),
                             created_at=datetime.now(timezone.utc)
                             )
-            connect.create_user(user=new_user)
+            await connect.create_user(user=new_user)
             return {
                 'accept': True
             }
@@ -74,7 +74,7 @@ async def registration(user: UserSchema):
 
 @router.post("/token")
 async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
-    user_found = connect.check_login(username=form_data.username)
+    user_found = await connect.check_login(username=form_data.username)
     if not user_found:
         raise HTTPException(status_code=400, detail="Incorrect username or password")
     password = check_password(form_data.password, user_found.hash_password.encode())
