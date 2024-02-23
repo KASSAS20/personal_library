@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     HOST: str
     PORT: str
     KEY: str
+    WEEK_TO_SECOND: int
 
     class Config:
         env_file = ".env"

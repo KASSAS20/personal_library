@@ -1,4 +1,4 @@
-from pydantic import field_validator, BaseModel
+from pydantic import field_validator, BaseModel, model_validator
 
 
 # Схема данных зарегистрированных пользователей
@@ -17,3 +17,9 @@ class UserSchema(BaseModel):
         if len(v) < 8:
             return False
         return v
+
+    @model_validator(mode="after")
+    def password_quality_login(self):
+        if self.login == self.password:
+            raise ValueError("password quality login")
+        return self

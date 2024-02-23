@@ -1,6 +1,8 @@
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from contextlib import asynccontextmanager
 from app.models import Base, UserModel
+from typing import NoReturn, Generator
+from app.schemes import UserSchema
 from sqlalchemy import select
 from settings import settings
 
@@ -21,25 +23,25 @@ class Connect:
 
 # декоратор служит для обозначения функции как асинхронного контекстного менеджера
 @asynccontextmanager
-async def get_session():
+async def get_session() -> Generator:
     async with Connect() as connection:
         yield connection
 
 
 # Класс для работы с запросами к базе данных касающихся пользователей
 class UserConnect:
-    async def create_user(self, user):
+    async def create_user(self, user:UserSchema) -> NoReturn:
         async with get_session() as session:
-            session.add(user)
-            session.commit()
+            async with session.begin():
+                session.add(user)
 
-    async def search_user(self, user):
+    async def search_user(self, user:UserSchema) -> UserModel:
         async with get_session() as session:
             result = await session.execute(select(UserModel).filter_by(login=user.login))
             user_instance = result.scalar_one_or_none()
             return user_instance
 
-    async def check_login(self, username):
+    async def check_login(self, username:str) -> UserModel:
         async with get_session() as session:
             result = await session.execute(select(UserModel).filter_by(login=username))
             user_instance = result.scalars().first()
