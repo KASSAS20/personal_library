@@ -36,11 +36,6 @@ def jwt_decode(token: dict, key: str) -> str:
     return jwt.decode(jwt=token, key=key, algorithms='HS256')
 
 
-# Тестовый роутер для демонстрации работы OAuth2
-@router.get("/test")
-async def test(token: Annotated[oauth2, Depends()]) -> dict:
-    return token
-
 
 # Роутер регистрации новых пользователей
 @router.post("/registration")
@@ -70,3 +65,4 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> d
         raise HTTPException(status_code=400, detail="Incorrect username or password")
     new_token = get_jwt({'login': form_data.username}, settings.KEY)
     return {'access_token': new_token, 'token_type': "bearer"}
+

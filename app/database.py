@@ -46,3 +46,5 @@ class UserConnect:
             result = await session.execute(select(UserModel).filter_by(login=username))
             user_instance = result.scalars().first()
             return user_instance
+
+

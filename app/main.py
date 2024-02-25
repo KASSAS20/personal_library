@@ -1,5 +1,6 @@
 from fastapi import FastAPI
-from app.auth import router as auth
+from app.components.auth import router as auth
+from app.components.book import router as book
 
 app = FastAPI()
 
@@ -9,5 +10,6 @@ app = FastAPI()
 async def root():
     return {"message": "Привет, мир!"}
 
-# интегрирование маршрутизатора в основой файл проекта
+# интегрирование маршрутизаторов в основой файл проекта
 app.include_router(auth)
+app.include_router(book)
