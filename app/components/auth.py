@@ -32,9 +32,8 @@ def get_jwt(data: dict, key: str) -> str:
 
 
 # Декодирование JWT
-def jwt_decode(token: dict, key: str) -> str:
+def jwt_decode(token: dict, key: str) -> dict:
     return jwt.decode(jwt=token, key=key, algorithms='HS256')
-
 
 
 # Роутер регистрации новых пользователей
@@ -45,12 +44,12 @@ async def registration(user: UserSchema) -> dict or HTTPException:
         if user_found is None:
             new_user = UserModel(login=user.login,
                                  hash_password=get_hashed_password(user.password).decode(),
-                                 created_at=datetime.now(timezone.utc)  # по дефолту должно отрабатывать
+                                 created_at=datetime.now(timezone.utc)
                                  )
-            await connect.create_user(user=new_user)
+            await connect.create_user(new_user)
             return {
-                    'accept': True
-                }
+                'accept': True
+            }
     raise HTTPException(status_code=400, detail="Incorrect data")
 
 
@@ -65,4 +64,3 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> d
         raise HTTPException(status_code=400, detail="Incorrect username or password")
     new_token = get_jwt({'login': form_data.username}, settings.KEY)
     return {'access_token': new_token, 'token_type': "bearer"}
-

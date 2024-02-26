@@ -1,8 +1,6 @@
-from datetime import timedelta
 from sqlalchemy import Column, String, Integer
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.types import TIMESTAMP
-from settings import settings
 from sqlalchemy import func
 
 
@@ -15,4 +13,15 @@ class UserModel(Base):
     id = Column(Integer, primary_key=True)
     login = Column(String, unique=True)
     hash_password = Column(String, nullable=False)
-    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now() + timedelta(seconds=settings.WEEK_TO_SECOND))
+    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
+
+
+# Модель таблицы книг и их связи с таблицей пользователей
+class BookModel(Base):
+    __tablename__ = 'books'
+    id = Column(Integer, primary_key=True)
+    name = Column(String, unique=True)
+    id_user = Column(Integer, nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
+    edit_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
+
