@@ -59,5 +59,5 @@ async def add_book(file: UploadFile, token: Annotated[oauth2, Depends()]) -> str
 
 
 @router.get("/get_book")
-async def get_book():
-    pass
+async def get_book(title: str, user_id: int) -> str:
+    return await connect.get_book(title, user_id)

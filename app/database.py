@@ -1,3 +1,4 @@
+import aiofiles
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from contextlib import asynccontextmanager
 from app.models import Base, UserModel, BookModel
@@ -60,5 +61,22 @@ class BookConnect:
         async with get_session() as session:
             async with session.begin():
                 session.add(book)
+
+
+    async def get_book(self, title: str, user_id: int):
+        async with get_session() as session:
+            search_entry = await session.execute(select(BookModel).filter_by(name=title))
+            search_entry = search_entry.scalars().first()
+            if search_entry.id_user == user_id:
+                path = f'src/book/{search_entry.name}'
+                async with aiofiles.open(path, 'rb') as file:
+                    content = await file.read()
+                result = {
+                    'title': title,
+                    'content': content
+                }
+                return result
+            return '0'
+
 
 
