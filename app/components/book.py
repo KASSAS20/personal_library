@@ -1,16 +1,16 @@
-from datetime import datetime, timezone
-
 from fastapi import Depends, HTTPException, UploadFile
-from app.router import router
+from app.database import UserConnect, BookConnect
+from app.components.auth import jwt_decode
+from datetime import datetime, timezone
 from app.components.auth import oauth2
+from app.models import BookModel
+from app.router import router
 from typing import Annotated
 from re import sub
-import mammoth
 import aiofiles
+import mammoth
 import io
-from app.database import UserConnect, BookConnect
-from app.models import BookModel
-from app.components.auth import jwt_decode
+
 
 router = router
 connect = BookConnect()
@@ -58,6 +58,12 @@ async def add_book(file: UploadFile, token: Annotated[oauth2, Depends()]) -> str
     raise HTTPException(status_code=400, detail="Only .docx files are allowed")
 
 
+# роутер получения пути к файлу по его имени
 @router.get("/get_book")
-async def get_book(title: str, user_id: int) -> str:
-    return await connect.get_book(title, user_id)
+async def get_book(title: str, token: Annotated[oauth2, Depends()]) -> str or HTTPException:
+    login = jwt_decode(token, 'bratislava')['login']
+    user_id = await UserConnect().get_id_by_username(login)
+    path = await connect.get_book(title, user_id)
+    if path:
+        return path
+    raise HTTPException(status_code=400, detail="Incorrect data")

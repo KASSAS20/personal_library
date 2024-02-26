@@ -1,11 +1,10 @@
-import aiofiles
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-from contextlib import asynccontextmanager
 from app.models import Base, UserModel, BookModel
-from typing import NoReturn, Generator
 from app.schemes import UserSchema, BookSchema
-from sqlalchemy import select
+from contextlib import asynccontextmanager
+from typing import NoReturn, Generator
 from settings import settings
+from sqlalchemy import select
 
 
 # Создаём кастомный класс для асинхронного контекстного менеджера
@@ -63,20 +62,15 @@ class BookConnect:
                 session.add(book)
 
 
-    async def get_book(self, title: str, user_id: int):
+    async def get_book(self, title: str, user_id: int) -> str or bool:
         async with get_session() as session:
             search_entry = await session.execute(select(BookModel).filter_by(name=title))
             search_entry = search_entry.scalars().first()
-            if search_entry.id_user == user_id:
-                path = f'src/book/{search_entry.name}'
-                async with aiofiles.open(path, 'rb') as file:
-                    content = await file.read()
-                result = {
-                    'title': title,
-                    'content': content
-                }
-                return result
-            return '0'
+            if search_entry:
+                if search_entry.id_user == user_id:
+                    path = f'src/book/{search_entry.name}'
+                    return path
+            return False
 
 
 
