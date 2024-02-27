@@ -23,9 +23,3 @@ class UserSchema(BaseModel):
         if self.login == self.password:
             raise ValueError("password quality login")
         return self
-
-
-# Схема данных добавленных книг
-class BookSchema(BaseModel):
-    name: str
-    id_user: int

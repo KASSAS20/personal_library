@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from app.components.auth import router as auth
-from app.components.book import router as book
+from app.components.auth.auth import router as auth
+from app.components.book.book import router as book
 
 app = FastAPI()
 
