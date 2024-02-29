@@ -26,8 +26,7 @@ def upgrade() -> None:
     sa.Column('id_user', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('edit_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('name')
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('users',
     sa.Column('id', sa.Integer(), nullable=False),
