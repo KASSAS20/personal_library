@@ -17,7 +17,8 @@ oauth2 = OAuth2PasswordBearer(tokenUrl="/token")
 
 # Роутер регистрации новых пользователей
 @router.post("/registration")
-async def registration(user: UserSchema, session: AsyncSession = Depends(get_session)) -> dict or HTTPException:
+async def registration(user: UserSchema,
+                       session: AsyncSession = Depends(get_session)) -> dict:
     if user.password and user.login:
         user_found = await connect.search_user(user, session)
         if user_found is None:
@@ -34,7 +35,8 @@ async def registration(user: UserSchema, session: AsyncSession = Depends(get_ses
 
 # роутер привязанный к oauth2 для предоставления доступа в случаи корректного ввода данных
 @router.post("/token")
-async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: AsyncSession = Depends(get_session)) -> dict:
+async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+                session: AsyncSession = Depends(get_session)) -> dict:
     user_found = await connect.check_login(username=form_data.username, session=session)
     if not user_found:
         raise HTTPException(status_code=400, detail="Incorrect username or password")
