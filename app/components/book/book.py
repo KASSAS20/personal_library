@@ -12,7 +12,7 @@ from app.session import get_async_session
 from fastapi import APIRouter
 
 
-router = APIRouter(prefix='book')
+router = APIRouter(prefix='/book')
 
 
 # добавление книги в бд и перевод её в md-формат

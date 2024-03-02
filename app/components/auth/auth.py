@@ -12,8 +12,8 @@ from typing import Annotated
 from fastapi import APIRouter
 
 
-router = APIRouter(prefix='auth')
-oauth2 = OAuth2PasswordBearer(tokenUrl="/token")
+router = APIRouter(prefix='/auth')
+oauth2 = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
 
 # Роутер регистрации новых пользователей

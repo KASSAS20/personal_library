@@ -19,3 +19,9 @@ services:
       - .:/app
     depends_on:
       - postgres
+  pytest:
+    build:
+      context: .
+    command: sh -c "pytest -v --disable-warnings"
+    depends_on:
+      - fastapi
