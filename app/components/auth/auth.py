@@ -5,7 +5,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.components.auth.service import get_hashed_password, check_password, get_jwt
 import app.components.auth.utils as connect
 from app.components.auth.schemes import UserSchema
-from app.components.auth.models import UserModel
 from app.session import get_async_session
 from settings import settings
 from typing import Annotated

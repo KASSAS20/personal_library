@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.components.auth.models import UserModel
-from app.components.auth.schemes import UserSchema
+from app.components.auth.schemes import UserOut
 
 
 # добавление пользователя в бд
@@ -15,10 +15,17 @@ async def create_user(data_user: dict, session: AsyncSession) -> None:
 
 
 # поиск пользователя
-async def search_user(username: str, session: AsyncSession) -> UserModel:
+async def search_user(username: str, session: AsyncSession) -> UserOut | None:
     result = await session.execute(select(UserModel).filter_by(login=username))
     user_instance = result.scalar_one_or_none()
-    return user_instance
+    if not user_instance:
+        return None
+    result = UserOut(
+        id=user_instance.id,
+        login=user_instance.login,
+        hash_password=user_instance.hash_password
+    )
+    return result
 
 
 # проверка пароля на валидность

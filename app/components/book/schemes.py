@@ -5,3 +5,4 @@ from pydantic import BaseModel
 class BookSchema(BaseModel):
     name: str
     user_id: int
+
