@@ -19,6 +19,7 @@ services:
       - .:/app
     depends_on:
       - postgres
+    restart: on-failure
   pytest:
     build:
       context: .

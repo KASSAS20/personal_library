@@ -20,18 +20,18 @@ oauth2 = OAuth2PasswordBearer(tokenUrl="/auth/token")
 @router.post("/registration")
 async def registration(user: UserSchema,
                        session: AsyncSession = Depends(get_async_session)) -> dict:
-    if user.password and user.login:
-        user_found = await connect.search_user(user, session)
-        if user_found is None:
-            new_user = UserModel(login=user.login,
-                                 hash_password=get_hashed_password(user.password).decode(),
-                                 created_at=datetime.now(timezone.utc)
-                                 )
-            await connect.create_user(new_user, session)
-            return {
-                'accept': True
-            }
-    raise HTTPException(status_code=400, detail="Incorrect data")
+    user_found = await connect.check_login(user.login, session)
+    if not user_found:
+        new_user = {
+            'login': user.login,
+            'hash_password': get_hashed_password(user.password).decode(),
+            'created_at': datetime.now(timezone.utc)
+        }
+        await connect.create_user(data_user=new_user, session=session)
+        return {
+            'accept': True
+        }
+    raise HTTPException(status_code=400, detail=f"Incorrect data")
 
 
 # роутер привязанный к oauth2 для предоставления доступа в случаи корректного ввода данных
@@ -39,9 +39,10 @@ async def registration(user: UserSchema,
 async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
                 session: AsyncSession = Depends(get_async_session)) -> dict:
     user_found = await connect.check_login(username=form_data.username, session=session)
+    hash_pas = await connect.search_user(form_data.username, session=session)
     if not user_found:
         raise HTTPException(status_code=400, detail="Incorrect username or password")
-    password = check_password(form_data.password, user_found.hash_password.encode())
+    password = check_password(form_data.password, hash_pas.hash_password.encode())
     if not password:
         raise HTTPException(status_code=400, detail="Incorrect username or password")
     new_token = get_jwt({'login': form_data.username}, settings.KEY)

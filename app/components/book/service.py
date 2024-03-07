@@ -13,6 +13,7 @@ async def docx_to_md(file) -> str:
     return md
 
 
+# сохранение файла
 async def save_md_to_src(file, name: str) -> None:
     async with aiofiles.open(f'src/book/{name}.md', 'w+') as md:
         await md.write(file)

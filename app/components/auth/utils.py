@@ -5,27 +5,24 @@ from app.components.auth.schemes import UserSchema
 
 
 # добавление пользователя в бд
-async def create_user(user: UserSchema, session: AsyncSession) -> None:
+async def create_user(data_user: dict, session: AsyncSession) -> None:
+    user = UserModel(login=data_user['login'],
+                     hash_password=data_user['hash_password'],
+                     created_at=data_user['created_at']
+                     )
     session.add(user)
     await session.commit()
 
 
 # поиск пользователя
-async def search_user(user: UserSchema, session: AsyncSession) -> UserModel:
-    result = await session.execute(select(UserModel).filter_by(login=user.login))
+async def search_user(username: str, session: AsyncSession) -> UserModel:
+    result = await session.execute(select(UserModel).filter_by(login=username))
     user_instance = result.scalar_one_or_none()
     return user_instance
 
 
 # проверка пароля на валидность
-async def check_login(username: str, session: AsyncSession) -> UserModel:
-    result = await session.execute(select(UserModel).filter_by(login=username))
-    user_instance = result.scalars().first()
-    return user_instance
-
-
-# поиск id пользователя по login
-async def get_id_by_username(login: str, session: AsyncSession):
-    result = await session.execute(select(UserModel).filter_by(login=login))
-    result = result.scalars().first().id
-    return result
+async def check_login(username: str, session: AsyncSession) -> bool:
+    if await search_user(username, session):
+        return True
+    return False

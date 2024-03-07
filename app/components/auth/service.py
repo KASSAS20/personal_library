@@ -1,5 +1,6 @@
 import bcrypt
 import jwt
+from settings import settings
 
 
 # Функция для хеширования пароля с добавлением соли
@@ -19,5 +20,5 @@ def get_jwt(data: dict, key: str) -> str:
 
 
 # Декодирование JWT
-def jwt_decode(token: dict, key: str) -> dict:
-    return jwt.decode(jwt=token, key=key, algorithms='HS256')
+def jwt_decode(token: dict) -> dict:
+    return jwt.decode(jwt=token, key=settings.KEY, algorithms='HS256')
