@@ -23,3 +23,9 @@ class UserSchema(BaseModel):
         if self.login == self.password:
             raise ValueError("password quality login")
         return self
+
+
+class UserOut(BaseModel):
+    id: int
+    login: str
+    hash_password: str
