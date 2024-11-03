@@ -25,4 +25,3 @@
   
   [kohiry](https://github.com/kohiry) - ментор  
   
-  [firty28](https://github.com/firty28) - frontend
